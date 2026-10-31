@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Tapsi&#39;s Turf — server stats</title>
+<style>
+:root{--bg:#0b0f14;--card:#121820;--line:#1f2937;--fg:#e6edf3;--mut:#8b98a9;
+--acc:#58a6ff;--ok:#3fb950;--warn:#f0883e}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+-webkit-font-smoothing:antialiased}
+main{max-width:1120px;margin:0 auto;padding:28px 20px 56px}
+h1{font-size:26px;margin:0;letter-spacing:-.02em}
+h2{font-size:13px;margin:0 0 14px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);font-weight:600}
+.hdr{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.ico{width:54px;height:54px;border-radius:14px;background:var(--card);object-fit:cover}
+.sub{color:var(--mut);font-size:13px;margin:4px 0 0}
+.cov{margin-left:auto;font-size:12px;color:var(--mut);border:1px solid var(--line);
+border-radius:999px;padding:5px 11px;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}`n@media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}}`n@media(max-width:520px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.kpi b{display:block;font-size:26px;font-weight:650;letter-spacing:-.02em;line-height:1.2}
+.kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:20px}
+.row2{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+.row2 .card{margin-bottom:20px}
+@media(max-width:860px){.row2{grid-template-columns:1fr}}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.heat{max-width:520px}
+.note{color:var(--mut);font-size:12px;margin:12px 0 0}
+.bar{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-size:13px}
+.bn{width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg)}
+.bt{flex:1;height:7px;background:#0b0f14;border-radius:99px;overflow:hidden}
+.bt i{display:block;height:100%;background:linear-gradient(90deg,#1f6feb,#58a6ff);border-radius:99px}
+.bar b{width:64px;text-align:right;color:var(--mut);font-weight:500;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;
+letter-spacing:.07em;padding:0 10px 8px;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--fg)}
+td{padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:hover{background:#0e141b}
+td:first-child{color:var(--mut)}
+.av{width:22px;height:22px;border-radius:50%;background:#0b0f14;object-fit:cover;flex:none}
+.who{display:inline-flex;align-items:center;gap:8px}
+.mini{display:inline-block;width:70px;height:5px;background:#0b0f14;border-radius:99px;vertical-align:middle;margin-right:7px;overflow:hidden}
+.mini i{display:block;height:100%;background:#3fb950;border-radius:99px}
+input#q{float:right;background:#0b0f14;border:1px solid var(--line);color:var(--fg);
+border-radius:8px;padding:5px 10px;font-size:12px;width:150px;text-transform:none;letter-spacing:0}
+.cloud{display:flex;flex-wrap:wrap;gap:.35rem .7rem;align-items:baseline;line-height:1.05;padding:2px 0}
+.cloud span{color:var(--acc);white-space:nowrap}
+.emojis{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px}
+.emojis div{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--mut);
+background:#0b0f14;border-radius:8px;padding:6px 9px}
+.emojis b{color:var(--fg);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:44px 24px;text-align:center}
+.empty h2{margin-bottom:8px}
+.empty p{color:var(--mut);margin:0;font-size:14px}
+footer{color:var(--mut);font-size:12px;margin-top:34px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header class="hdr">
+  <img class="ico" src="https://cdn.discordapp.com/icons/956930938682617956/a_b09acad7517a33d76969440d63a13bca.png?size=96" alt="" width="54" height="54" loading="lazy">
+  <div>
+    <h1>Tapsi&#39;s Turf</h1>
+    <p class="sub">26 Oct 2026 → 1 Nov 2026 · 21 active members · 318 members in server</p>
+  </div>
+  <div class="cov" title="Share of tracked time the collector was actually running">collector up 76%</div>
+</header>
+
+
+<section class="kpis">
+  <div class="kpi"><b>124</b><span>messages</span></div>
+  <div class="kpi"><b>21</b><span>active members</span></div>
+  <div class="kpi"><b>7</b><span>days tracked</span></div>
+  <div class="kpi"><b>17</b><span>avg / day</span></div>
+  <div class="kpi"><b>26</b><span>avg chars</span></div>
+  <div class="kpi"><b>12.9%</b><span>with links</span></div>
+</section>
+
+<section class="card">
+  <h2>Messages per day</h2>
+  <div class="chart"><svg viewBox="0 0 1000 260" role="img" aria-label="Messages per day, with a 7-day average line"><rect x="26.0" y="14.0" width="40.0" height="220.0" fill="#f85149" opacity="0.12"/><rect x="960.0" y="14.0" width="40.0" height="220.0" fill="#f85149" opacity="0.12"/><rect x="31.6" y="223.0" width="28.8" height="11.0" fill="#58a6ff" opacity="0.22"/><rect x="187.3" y="218.6" width="28.8" height="15.4" fill="#58a6ff" opacity="0.22"/><rect x="342.9" y="205.4" width="28.8" height="28.6" fill="#58a6ff" opacity="0.22"/><rect x="498.6" y="192.2" width="28.8" height="41.8" fill="#58a6ff" opacity="0.22"/><rect x="654.3" y="225.2" width="28.8" height="8.8" fill="#58a6ff" opacity="0.22"/><rect x="809.9" y="95.4" width="28.8" height="138.6" fill="#58a6ff" opacity="0.22"/><rect x="965.6" y="205.4" width="28.8" height="28.6" fill="#58a6ff" opacity="0.22"/><line x1="46.0" y1="14.0" x2="980.0" y2="14.0" stroke="currentColor" stroke-opacity="0.10" vector-effect="non-scaling-stroke"/><text x="40.0" y="17.0" fill="currentColor" opacity="0.55" font-size="10" text-anchor="end">100</text><line x1="46.0" y1="69.0" x2="980.0" y2="69.0" stroke="currentColor" stroke-opacity="0.10" vector-effect="non-scaling-stroke"/><text x="40.0" y="72.0" fill="currentColor" opacity="0.55" font-size="10" text-anchor="end">75</text><line x1="46.0" y1="124.0" x2="980.0" y2="124.0" stroke="currentColor" stroke-opacity="0.10" vector-effect="non-scaling-stroke"/><text x="40.0" y="127.0" fill="currentColor" opacity="0.55" font-size="10" text-anchor="end">50</text><line x1="46.0" y1="179.0" x2="980.0" y2="179.0" stroke="currentColor" stroke-opacity="0.10" vector-effect="non-scaling-stroke"/><text x="40.0" y="182.0" fill="currentColor" opacity="0.55" font-size="10" text-anchor="end">25</text><line x1="46.0" y1="234.0" x2="980.0" y2="234.0" stroke="currentColor" stroke-opacity="0.10" vector-effect="non-scaling-stroke"/><text x="40.0" y="237.0" fill="currentColor" opacity="0.55" font-size="10" text-anchor="end">0</text><path d="M46.0,223.0 L201.7,220.8 L357.3,215.7 L513.0,209.8 L668.7,212.9 L824.3,193.3 L980.0,195.0 L980.0,234.0 L46.0,234.0 Z" fill="#58a6ff" fill-opacity="0.16"/><path d="M46.0,223.0 L201.7,220.8 L357.3,215.7 L513.0,209.8 L668.7,212.9 L824.3,193.3 L980.0,195.0" fill="none" stroke="#58a6ff" stroke-width="1.8" vector-effect="non-scaling-stroke"/><rect x="26.0" y="14.0" width="40.0" height="220.0" fill="transparent"><title>26 Oct: 5 messages · collector up 16%</title></rect><rect x="181.7" y="14.0" width="40.0" height="220.0" fill="transparent"><title>27 Oct: 7 messages · collector up 100%</title></rect><rect x="337.3" y="14.0" width="40.0" height="220.0" fill="transparent"><title>28 Oct: 13 messages · collector up 100%</title></rect><rect x="493.0" y="14.0" width="40.0" height="220.0" fill="transparent"><title>29 Oct: 19 messages · collector up 100%</title></rect><rect x="648.7" y="14.0" width="40.0" height="220.0" fill="transparent"><title>30 Oct: 4 messages · collector up 100%</title></rect><rect x="804.3" y="14.0" width="40.0" height="220.0" fill="transparent"><title>31 Oct: 63 messages · collector up 100%</title></rect><rect x="960.0" y="14.0" width="40.0" height="220.0" fill="transparent"><title>1 Nov: 13 messages · collector up 20%</title></rect><text x="46.0" y="252.0" fill="currentColor" opacity="0.55" font-size="10">26 Oct</text><text x="980.0" y="252.0" fill="currentColor" opacity="0.55" font-size="10" text-anchor="end">1 Nov</text></svg></div>
+  <p class="note">23.4% of messages carried a file · 27.4% were replies. Red bands mark days the collector was offline — those counts are incomplete, not quiet.</p>
+</section>
+
+<div class="row2">
+  <section class="card">
+    <h2>When people talk <span style="text-transform:none;letter-spacing:0">(local time)</span></h2>
+    <div class="chart"><svg viewBox="0 0 420 130" role="img" aria-label="Activity by weekday and hour" class="heat"><text x="0" y="29.0" font-size="9" fill="currentColor" opacity="0.55">Sun</text><rect x="30.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.43"><title>Sun 00:00 — 9 messages</title></rect><rect x="45.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.22"><title>Sun 01:00 — 4 messages</title></rect><rect x="60.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 02:00 — 0 messages</title></rect><rect x="75.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 03:00 — 0 messages</title></rect><rect x="90.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 04:00 — 0 messages</title></rect><rect x="105.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 05:00 — 0 messages</title></rect><rect x="120.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 06:00 — 0 messages</title></rect><rect x="135.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 07:00 — 0 messages</title></rect><rect x="150.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 08:00 — 0 messages</title></rect><rect x="165.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 09:00 — 0 messages</title></rect><rect x="180.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 10:00 — 0 messages</title></rect><rect x="195.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 11:00 — 0 messages</title></rect><rect x="210.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 12:00 — 0 messages</title></rect><rect x="225.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 13:00 — 0 messages</title></rect><rect x="240.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 14:00 — 0 messages</title></rect><rect x="255.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 15:00 — 0 messages</title></rect><rect x="270.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 16:00 — 0 messages</title></rect><rect x="285.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 17:00 — 0 messages</title></rect><rect x="300.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 18:00 — 0 messages</title></rect><rect x="315.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 19:00 — 0 messages</title></rect><rect x="330.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 20:00 — 0 messages</title></rect><rect x="345.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 21:00 — 0 messages</title></rect><rect x="360.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 22:00 — 0 messages</title></rect><rect x="375.0" y="14.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sun 23:00 — 0 messages</title></rect><text x="0" y="44.0" font-size="9" fill="currentColor" opacity="0.55">Mon</text><rect x="30.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 00:00 — 0 messages</title></rect><rect x="45.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 01:00 — 0 messages</title></rect><rect x="60.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 02:00 — 0 messages</title></rect><rect x="75.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 03:00 — 0 messages</title></rect><rect x="90.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 04:00 — 0 messages</title></rect><rect x="105.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 05:00 — 0 messages</title></rect><rect x="120.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 06:00 — 0 messages</title></rect><rect x="135.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 07:00 — 0 messages</title></rect><rect x="150.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 08:00 — 0 messages</title></rect><rect x="165.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 09:00 — 0 messages</title></rect><rect x="180.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 10:00 — 0 messages</title></rect><rect x="195.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 11:00 — 0 messages</title></rect><rect x="210.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 12:00 — 0 messages</title></rect><rect x="225.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 13:00 — 0 messages</title></rect><rect x="240.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 14:00 — 0 messages</title></rect><rect x="255.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 15:00 — 0 messages</title></rect><rect x="270.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 16:00 — 0 messages</title></rect><rect x="285.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 17:00 — 0 messages</title></rect><rect x="300.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 18:00 — 0 messages</title></rect><rect x="315.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 19:00 — 0 messages</title></rect><rect x="330.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.22"><title>Mon 20:00 — 4 messages</title></rect><rect x="345.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 21:00 — 0 messages</title></rect><rect x="360.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Mon 22:00 — 1 messages</title></rect><rect x="375.0" y="29.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Mon 23:00 — 0 messages</title></rect><text x="0" y="59.0" font-size="9" fill="currentColor" opacity="0.55">Tue</text><rect x="30.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 00:00 — 0 messages</title></rect><rect x="45.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 01:00 — 0 messages</title></rect><rect x="60.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 02:00 — 0 messages</title></rect><rect x="75.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 03:00 — 0 messages</title></rect><rect x="90.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 04:00 — 0 messages</title></rect><rect x="105.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 05:00 — 0 messages</title></rect><rect x="120.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 06:00 — 0 messages</title></rect><rect x="135.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 07:00 — 0 messages</title></rect><rect x="150.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 08:00 — 0 messages</title></rect><rect x="165.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 09:00 — 0 messages</title></rect><rect x="180.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 10:00 — 0 messages</title></rect><rect x="195.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 11:00 — 0 messages</title></rect><rect x="210.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 12:00 — 0 messages</title></rect><rect x="225.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Tue 13:00 — 1 messages</title></rect><rect x="240.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.26"><title>Tue 14:00 — 5 messages</title></rect><rect x="255.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 15:00 — 0 messages</title></rect><rect x="270.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 16:00 — 0 messages</title></rect><rect x="285.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 17:00 — 0 messages</title></rect><rect x="300.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 18:00 — 0 messages</title></rect><rect x="315.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 19:00 — 0 messages</title></rect><rect x="330.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 20:00 — 0 messages</title></rect><rect x="345.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 21:00 — 0 messages</title></rect><rect x="360.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Tue 22:00 — 1 messages</title></rect><rect x="375.0" y="44.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Tue 23:00 — 0 messages</title></rect><text x="0" y="74.0" font-size="9" fill="currentColor" opacity="0.55">Wed</text><rect x="30.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Wed 00:00 — 1 messages</title></rect><rect x="45.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 01:00 — 0 messages</title></rect><rect x="60.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 02:00 — 0 messages</title></rect><rect x="75.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 03:00 — 0 messages</title></rect><rect x="90.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 04:00 — 0 messages</title></rect><rect x="105.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 05:00 — 0 messages</title></rect><rect x="120.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 06:00 — 0 messages</title></rect><rect x="135.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Wed 07:00 — 1 messages</title></rect><rect x="150.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 08:00 — 0 messages</title></rect><rect x="165.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 09:00 — 0 messages</title></rect><rect x="180.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.18"><title>Wed 10:00 — 3 messages</title></rect><rect x="195.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.14"><title>Wed 11:00 — 2 messages</title></rect><rect x="210.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Wed 12:00 — 1 messages</title></rect><rect x="225.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 13:00 — 0 messages</title></rect><rect x="240.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 14:00 — 0 messages</title></rect><rect x="255.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 15:00 — 0 messages</title></rect><rect x="270.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 16:00 — 0 messages</title></rect><rect x="285.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 17:00 — 0 messages</title></rect><rect x="300.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.14"><title>Wed 18:00 — 2 messages</title></rect><rect x="315.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Wed 19:00 — 1 messages</title></rect><rect x="330.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Wed 20:00 — 1 messages</title></rect><rect x="345.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Wed 21:00 — 1 messages</title></rect><rect x="360.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 22:00 — 0 messages</title></rect><rect x="375.0" y="59.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Wed 23:00 — 0 messages</title></rect><text x="0" y="89.0" font-size="9" fill="currentColor" opacity="0.55">Thu</text><rect x="30.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 00:00 — 0 messages</title></rect><rect x="45.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 01:00 — 0 messages</title></rect><rect x="60.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 02:00 — 0 messages</title></rect><rect x="75.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 03:00 — 0 messages</title></rect><rect x="90.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 04:00 — 0 messages</title></rect><rect x="105.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 05:00 — 0 messages</title></rect><rect x="120.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 06:00 — 0 messages</title></rect><rect x="135.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 07:00 — 0 messages</title></rect><rect x="150.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.22"><title>Thu 08:00 — 4 messages</title></rect><rect x="165.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.47"><title>Thu 09:00 — 10 messages</title></rect><rect x="180.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Thu 10:00 — 1 messages</title></rect><rect x="195.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.22"><title>Thu 11:00 — 4 messages</title></rect><rect x="210.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 12:00 — 0 messages</title></rect><rect x="225.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 13:00 — 0 messages</title></rect><rect x="240.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 14:00 — 0 messages</title></rect><rect x="255.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 15:00 — 0 messages</title></rect><rect x="270.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 16:00 — 0 messages</title></rect><rect x="285.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 17:00 — 0 messages</title></rect><rect x="300.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 18:00 — 0 messages</title></rect><rect x="315.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 19:00 — 0 messages</title></rect><rect x="330.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 20:00 — 0 messages</title></rect><rect x="345.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 21:00 — 0 messages</title></rect><rect x="360.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 22:00 — 0 messages</title></rect><rect x="375.0" y="74.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Thu 23:00 — 0 messages</title></rect><text x="0" y="104.0" font-size="9" fill="currentColor" opacity="0.55">Fri</text><rect x="30.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 00:00 — 0 messages</title></rect><rect x="45.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 01:00 — 0 messages</title></rect><rect x="60.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 02:00 — 0 messages</title></rect><rect x="75.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 03:00 — 0 messages</title></rect><rect x="90.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 04:00 — 0 messages</title></rect><rect x="105.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 05:00 — 0 messages</title></rect><rect x="120.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 06:00 — 0 messages</title></rect><rect x="135.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 07:00 — 0 messages</title></rect><rect x="150.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 08:00 — 0 messages</title></rect><rect x="165.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 09:00 — 0 messages</title></rect><rect x="180.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 10:00 — 0 messages</title></rect><rect x="195.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 11:00 — 0 messages</title></rect><rect x="210.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 12:00 — 0 messages</title></rect><rect x="225.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 13:00 — 0 messages</title></rect><rect x="240.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 14:00 — 0 messages</title></rect><rect x="255.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 15:00 — 0 messages</title></rect><rect x="270.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 16:00 — 0 messages</title></rect><rect x="285.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 17:00 — 0 messages</title></rect><rect x="300.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.14"><title>Fri 18:00 — 2 messages</title></rect><rect x="315.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 19:00 — 0 messages</title></rect><rect x="330.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Fri 20:00 — 1 messages</title></rect><rect x="345.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Fri 21:00 — 1 messages</title></rect><rect x="360.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 22:00 — 0 messages</title></rect><rect x="375.0" y="89.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Fri 23:00 — 0 messages</title></rect><text x="0" y="119.0" font-size="9" fill="currentColor" opacity="0.55">Sat</text><rect x="30.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 00:00 — 0 messages</title></rect><rect x="45.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 01:00 — 0 messages</title></rect><rect x="60.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 02:00 — 0 messages</title></rect><rect x="75.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 03:00 — 0 messages</title></rect><rect x="90.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 04:00 — 0 messages</title></rect><rect x="105.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 05:00 — 0 messages</title></rect><rect x="120.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 06:00 — 0 messages</title></rect><rect x="135.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 07:00 — 0 messages</title></rect><rect x="150.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 08:00 — 0 messages</title></rect><rect x="165.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 09:00 — 0 messages</title></rect><rect x="180.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 10:00 — 0 messages</title></rect><rect x="195.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 11:00 — 0 messages</title></rect><rect x="210.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.10"><title>Sat 12:00 — 1 messages</title></rect><rect x="225.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 13:00 — 0 messages</title></rect><rect x="240.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 14:00 — 0 messages</title></rect><rect x="255.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 15:00 — 0 messages</title></rect><rect x="270.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.14"><title>Sat 16:00 — 2 messages</title></rect><rect x="285.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.96"><title>Sat 17:00 — 22 messages</title></rect><rect x="300.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.14"><title>Sat 18:00 — 2 messages</title></rect><rect x="315.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.06"><title>Sat 19:00 — 0 messages</title></rect><rect x="330.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.47"><title>Sat 20:00 — 10 messages</title></rect><rect x="345.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.51"><title>Sat 21:00 — 11 messages</title></rect><rect x="360.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.43"><title>Sat 22:00 — 9 messages</title></rect><rect x="375.0" y="104.0" width="13" height="13" rx="2" fill="#58a6ff" opacity="0.31"><title>Sat 23:00 — 6 messages</title></rect><text x="30.0" y="126" font-size="9" fill="currentColor" opacity="0.55">00</text><text x="120.0" y="126" font-size="9" fill="currentColor" opacity="0.55">06</text><text x="210.0" y="126" font-size="9" fill="currentColor" opacity="0.55">12</text><text x="300.0" y="126" font-size="9" fill="currentColor" opacity="0.55">18</text></svg></div>
+  </section>
+  <section class="card">
+    <h2>Top channels</h2>
+    <div class="bar"><span class="bn" title="🥚egg-carton">🥚egg-carton</span><span class="bt"><i style="width:100.0%"></i></span><b>59</b></div><div class="bar"><span class="bn" title="General">General</span><span class="bt"><i style="width:84.7%"></i></span><b>50</b></div><div class="bar"><span class="bn" title="🎮games">🎮games</span><span class="bt"><i style="width:20.3%"></i></span><b>12</b></div><div class="bar"><span class="bn" title="co-working space">co-working space</span><span class="bt"><i style="width:1.7%"></i></span><b>1</b></div><div class="bar"><span class="bn" title="😆meme-channel">😆meme-channel</span><span class="bt"><i style="width:1.7%"></i></span><b>1</b></div><div class="bar"><span class="bn" title="🍩food">🍩food</span><span class="bt"><i style="width:1.7%"></i></span><b>1</b></div>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Members <input id="q" placeholder="filter" aria-label="filter members"></h2>
+  <table id="mt">
+    <thead><tr>
+      <th class="num" data-k="0">#</th>
+      <th data-k="1">member</th>
+      <th class="num" data-k="2">messages</th>
+      <th data-k="3">share</th>
+      <th class="num" data-k="4">avg chars</th>
+    </tr></thead>
+    <tbody>
+    
+      <tr>
+        <td class="num">15</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/956587565752909844/da32f34eda275ec322499ac82aaf0cda.png?size=64" alt="" width="22" height="22" loading="lazy">Ta***</span></td>
+        <td class="num">22</td>
+        <td><span class="mini"><i style="width:17.7%"></i></span>17.7%</td>
+        <td class="num">24</td>
+      </tr>
+    
+      <tr>
+        <td class="num">1</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/968392283911258174/78ee4805ba0de086c29df1c44b182b81.png?size=64" alt="" width="22" height="22" loading="lazy">Chr***</span></td>
+        <td class="num">20</td>
+        <td><span class="mini"><i style="width:16.1%"></i></span>16.1%</td>
+        <td class="num">19</td>
+      </tr>
+    
+      <tr>
+        <td class="num">8</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/833714936903237644/65a110d2d2ad88d980eff2350466ba73.png?size=64" alt="" width="22" height="22" loading="lazy">Hikikoca***</span></td>
+        <td class="num">13</td>
+        <td><span class="mini"><i style="width:10.5%"></i></span>10.5%</td>
+        <td class="num">26</td>
+      </tr>
+    
+      <tr>
+        <td class="num">6</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/560629121864957982/08982330f0c6cdea4603c778b10670d4.png?size=64" alt="" width="22" height="22" loading="lazy">Va***</span></td>
+        <td class="num">11</td>
+        <td><span class="mini"><i style="width:8.9%"></i></span>8.9%</td>
+        <td class="num">28</td>
+      </tr>
+    
+      <tr>
+        <td class="num">7</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/743071806084218981/54370eadd93c5f426939787b694cd66f.png?size=64" alt="" width="22" height="22" loading="lazy">Eru Hik***</span></td>
+        <td class="num">11</td>
+        <td><span class="mini"><i style="width:8.9%"></i></span>8.9%</td>
+        <td class="num">11</td>
+      </tr>
+    
+      <tr>
+        <td class="num">18</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/776482642941706281/acc4e0e80f5aec582b9ddc6679d170a9.png?size=64" alt="" width="22" height="22" loading="lazy">JoJo ⪩.***</span></td>
+        <td class="num">7</td>
+        <td><span class="mini"><i style="width:5.6%"></i></span>5.6%</td>
+        <td class="num">17</td>
+      </tr>
+    
+      <tr>
+        <td class="num">12</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/345578113096482816/6fd22ce86299068232f62d93918d5dbf.png?size=64" alt="" width="22" height="22" loading="lazy">Arturo Malu***</span></td>
+        <td class="num">6</td>
+        <td><span class="mini"><i style="width:4.8%"></i></span>4.8%</td>
+        <td class="num">31</td>
+      </tr>
+    
+      <tr>
+        <td class="num">11</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/1232841472072749069/deeac347d83950e79d74124f4130085d.png?size=64" alt="" width="22" height="22" loading="lazy">Na***</span></td>
+        <td class="num">6</td>
+        <td><span class="mini"><i style="width:4.8%"></i></span>4.8%</td>
+        <td class="num">35</td>
+      </tr>
+    
+      <tr>
+        <td class="num">21</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/488188128268648469/6c75aeab9d3eba87c3292d225e50a371.png?size=64" alt="" width="22" height="22" loading="lazy">Leilv***</span></td>
+        <td class="num">5</td>
+        <td><span class="mini"><i style="width:4.0%"></i></span>4.0%</td>
+        <td class="num">4</td>
+      </tr>
+    
+      <tr>
+        <td class="num">5</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/276939777943797760/54abcb890c9ffd5612d05f7673d66f3e.png?size=64" alt="" width="22" height="22" loading="lazy">Dalel***</span></td>
+        <td class="num">4</td>
+        <td><span class="mini"><i style="width:3.2%"></i></span>3.2%</td>
+        <td class="num">112</td>
+      </tr>
+    
+      <tr>
+        <td class="num">20</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/1358391190713794571/8e3c45de2a65d7c43e0f8bbfb6208362.png?size=64" alt="" width="22" height="22" loading="lazy">U***</span></td>
+        <td class="num">3</td>
+        <td><span class="mini"><i style="width:2.4%"></i></span>2.4%</td>
+        <td class="num">43</td>
+      </tr>
+    
+      <tr>
+        <td class="num">3</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/85397673166782464/e5468b23c84a841dd61165ff81308c48.png?size=64" alt="" width="22" height="22" loading="lazy">〜ヌ***</span></td>
+        <td class="num">2</td>
+        <td><span class="mini"><i style="width:1.6%"></i></span>1.6%</td>
+        <td class="num">22</td>
+      </tr>
+    
+      <tr>
+        <td class="num">9</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/335029325617430528/ceedc279c7e7b171a795420ec4d0d813.png?size=64" alt="" width="22" height="22" loading="lazy">Breaking M***</span></td>
+        <td class="num">2</td>
+        <td><span class="mini"><i style="width:1.6%"></i></span>1.6%</td>
+        <td class="num">7</td>
+      </tr>
+    
+      <tr>
+        <td class="num">17</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/375946809111216129/f0370ac87cfcc9473a3a56ea7682f676.png?size=64" alt="" width="22" height="22" loading="lazy">almost al***</span></td>
+        <td class="num">2</td>
+        <td><span class="mini"><i style="width:1.6%"></i></span>1.6%</td>
+        <td class="num">40</td>
+      </tr>
+    
+      <tr>
+        <td class="num">13</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/557187979421155328/01e83d4179d970fdbb31ef7f2355b4c7.png?size=64" alt="" width="22" height="22" loading="lazy">Lmathew3***</span></td>
+        <td class="num">2</td>
+        <td><span class="mini"><i style="width:1.6%"></i></span>1.6%</td>
+        <td class="num">49</td>
+      </tr>
+    
+      <tr>
+        <td class="num">10</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/617196697860308992/9738140e4c7a977d1af96f84803e7b03.png?size=64" alt="" width="22" height="22" loading="lazy">Hermit***</span></td>
+        <td class="num">2</td>
+        <td><span class="mini"><i style="width:1.6%"></i></span>1.6%</td>
+        <td class="num">41</td>
+      </tr>
+    
+      <tr>
+        <td class="num">19</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/748409843752239164/954a153f22bb37bfe23f372602177da3.png?size=64" alt="" width="22" height="22" loading="lazy">CyberDa***</span></td>
+        <td class="num">2</td>
+        <td><span class="mini"><i style="width:1.6%"></i></span>1.6%</td>
+        <td class="num">24</td>
+      </tr>
+    
+      <tr>
+        <td class="num">14</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/305681787626192897/5c93299927f741ab895b73979aca3a4b.png?size=64" alt="" width="22" height="22" loading="lazy">H***</span></td>
+        <td class="num">1</td>
+        <td><span class="mini"><i style="width:0.8%"></i></span>0.8%</td>
+        <td class="num">12</td>
+      </tr>
+    
+      <tr>
+        <td class="num">2</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/611750838766927872/64d4efa1996c839f45d10f151dfd11ef.png?size=64" alt="" width="22" height="22" loading="lazy">crosshair***</span></td>
+        <td class="num">1</td>
+        <td><span class="mini"><i style="width:0.8%"></i></span>0.8%</td>
+        <td class="num">10</td>
+      </tr>
+    
+      <tr>
+        <td class="num">4</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/1132115160803332186/70aa376459161f075f966e5ed4710e9c.png?size=64" alt="" width="22" height="22" loading="lazy">eu***</span></td>
+        <td class="num">1</td>
+        <td><span class="mini"><i style="width:0.8%"></i></span>0.8%</td>
+        <td class="num">0</td>
+      </tr>
+    
+      <tr>
+        <td class="num">16</td>
+        <td><span class="who"><img class="av" src="https://cdn.discordapp.com/avatars/1229938374593216566/197eb031c1fbb39cb26132c15e5c67f2.png?size=64" alt="" width="22" height="22" loading="lazy">Zahir Era***</span></td>
+        <td class="num">1</td>
+        <td><span class="mini"><i style="width:0.8%"></i></span>0.8%</td>
+        <td class="num">11</td>
+      </tr>
+    
+    </tbody>
+  </table>
+  <p class="note">Names are masked: the last three characters are hidden. Message text is never stored or published.</p>
+</section>
+
+<div class="row2">
+  <section class="card">
+    <h2>Words</h2>
+    <div class="cloud"><span style="font-size:1.95rem;opacity:1.00" title="4">day</span><span style="font-size:1.80rem;opacity:0.94" title="3">walang</span><span style="font-size:1.80rem;opacity:0.94" title="3">well</span><span style="font-size:1.61rem;opacity:0.87" title="2">alam</span><span style="font-size:1.61rem;opacity:0.87" title="2">brb</span><span style="font-size:1.61rem;opacity:0.87" title="2">bye</span><span style="font-size:1.61rem;opacity:0.87" title="2">collab</span><span style="font-size:1.61rem;opacity:0.87" title="2">dati</span><span style="font-size:1.61rem;opacity:0.87" title="2">days</span><span style="font-size:1.61rem;opacity:0.87" title="2">gon</span><span style="font-size:1.61rem;opacity:0.87" title="2">good</span><span style="font-size:1.61rem;opacity:0.87" title="2">hahahah</span><span style="font-size:1.61rem;opacity:0.87" title="2">kalbo</span><span style="font-size:1.61rem;opacity:0.87" title="2">muna</span><span style="font-size:1.61rem;opacity:0.87" title="2">nangyari</span><span style="font-size:1.61rem;opacity:0.87" title="2">rest</span><span style="font-size:1.61rem;opacity:0.87" title="2">sana</span><span style="font-size:1.61rem;opacity:0.87" title="2">time</span><span style="font-size:1.61rem;opacity:0.87" title="2">tubig</span><span style="font-size:1.61rem;opacity:0.87" title="2">utot</span><span style="font-size:1.61rem;opacity:0.87" title="2">wait</span><span style="font-size:1.38rem;opacity:0.78" title="1">7am</span><span style="font-size:1.38rem;opacity:0.78" title="1">aah</span><span style="font-size:1.38rem;opacity:0.78" title="1">aftie</span><span style="font-size:1.38rem;opacity:0.78" title="1">ahhhh</span><span style="font-size:1.38rem;opacity:0.78" title="1">alamang</span><span style="font-size:1.38rem;opacity:0.78" title="1">amu</span><span style="font-size:1.38rem;opacity:0.78" title="1">ano</span><span style="font-size:1.38rem;opacity:0.78" title="1">back</span><span style="font-size:1.38rem;opacity:0.78" title="1">backup</span><span style="font-size:1.38rem;opacity:0.78" title="1">bacteria</span><span style="font-size:1.38rem;opacity:0.78" title="1">bahay</span><span style="font-size:1.38rem;opacity:0.78" title="1">bakasyon</span><span style="font-size:1.38rem;opacity:0.78" title="1">basta</span><span style="font-size:1.38rem;opacity:0.78" title="1">bat</span><span style="font-size:1.38rem;opacity:0.78" title="1">bebe</span><span style="font-size:1.38rem;opacity:0.78" title="1">bit</span><span style="font-size:1.38rem;opacity:0.78" title="1">bois</span><span style="font-size:1.38rem;opacity:0.78" title="1">bokalz</span><span style="font-size:1.38rem;opacity:0.78" title="1">break</span><span style="font-size:1.38rem;opacity:0.78" title="1">butas</span><span style="font-size:1.38rem;opacity:0.78" title="1">buy</span><span style="font-size:1.38rem;opacity:0.78" title="1">cant</span><span style="font-size:1.38rem;opacity:0.78" title="1">carnal</span><span style="font-size:1.38rem;opacity:0.78" title="1">celebrate</span><span style="font-size:1.38rem;opacity:0.78" title="1">check</span><span style="font-size:1.38rem;opacity:0.78" title="1">chooks</span><span style="font-size:1.38rem;opacity:0.78" title="1">chrono</span><span style="font-size:1.38rem;opacity:0.78" title="1">clothes</span><span style="font-size:1.38rem;opacity:0.78" title="1">collection</span><span style="font-size:1.38rem;opacity:0.78" title="1">congrats</span><span style="font-size:1.38rem;opacity:0.78" title="1">congrazzles</span><span style="font-size:1.38rem;opacity:0.78" title="1">contract</span><span style="font-size:1.38rem;opacity:0.78" title="1">convention</span><span style="font-size:1.38rem;opacity:0.78" title="1">currency</span><span style="font-size:1.38rem;opacity:0.78" title="1">dating</span><span style="font-size:1.38rem;opacity:0.78" title="1">doing</span><span style="font-size:1.38rem;opacity:0.78" title="1">dont</span><span style="font-size:1.38rem;opacity:0.78" title="1">drinking</span><span style="font-size:1.38rem;opacity:0.78" title="1">drives</span><span style="font-size:1.38rem;opacity:0.78" title="1">dropping</span><span style="font-size:1.38rem;opacity:0.78" title="1">during</span><span style="font-size:1.38rem;opacity:0.78" title="1">ear</span><span style="font-size:1.38rem;opacity:0.78" title="1">ellen</span><span style="font-size:1.38rem;opacity:0.78" title="1">ello</span><span style="font-size:1.38rem;opacity:0.78" title="1">eruuu</span><span style="font-size:1.38rem;opacity:0.78" title="1">evening</span><span style="font-size:1.38rem;opacity:0.78" title="1">exit</span><span style="font-size:1.38rem;opacity:0.78" title="1">exposing</span><span style="font-size:1.38rem;opacity:0.78" title="1">face</span><span style="font-size:1.38rem;opacity:0.78" title="1">fact</span><span style="font-size:1.38rem;opacity:0.78" title="1">fancy</span><span style="font-size:1.38rem;opacity:0.78" title="1">fart</span><span style="font-size:1.38rem;opacity:0.78" title="1">fatigue</span><span style="font-size:1.38rem;opacity:0.78" title="1">fiction</span><span style="font-size:1.38rem;opacity:0.78" title="1">filter</span><span style="font-size:1.38rem;opacity:0.78" title="1">format</span><span style="font-size:1.38rem;opacity:0.78" title="1">ganyan</span><span style="font-size:1.38rem;opacity:0.78" title="1">gastos</span><span style="font-size:1.38rem;opacity:0.78" title="1">gear</span><span style="font-size:1.38rem;opacity:0.78" title="1">germs</span><span style="font-size:1.38rem;opacity:0.78" title="1">got</span><span style="font-size:1.38rem;opacity:0.78" title="1">group</span><span style="font-size:1.38rem;opacity:0.78" title="1">guys</span><span style="font-size:1.38rem;opacity:0.78" title="1">hahahaha</span><span style="font-size:1.38rem;opacity:0.78" title="1">health</span><span style="font-size:1.38rem;opacity:0.78" title="1">hinahanap</span><span style="font-size:1.38rem;opacity:0.78" title="1">home</span><span style="font-size:1.38rem;opacity:0.78" title="1">homecooked</span><span style="font-size:1.38rem;opacity:0.78" title="1">hsr</span><span style="font-size:1.38rem;opacity:0.78" title="1">inang</span><span style="font-size:1.38rem;opacity:0.78" title="1">ipalo</span><span style="font-size:1.38rem;opacity:0.78" title="1">itlogs</span><span style="font-size:1.38rem;opacity:0.78" title="1">jammin</span><span style="font-size:1.38rem;opacity:0.78" title="1">job</span><span style="font-size:1.38rem;opacity:0.78" title="1">joe</span><span style="font-size:1.38rem;opacity:0.78" title="1">kalbong</span><span style="font-size:1.38rem;opacity:0.78" title="1">kamusta</span><span style="font-size:1.38rem;opacity:0.78" title="1">katulad</span><span style="font-size:1.38rem;opacity:0.78" title="1">kay</span><span style="font-size:1.38rem;opacity:0.78" title="1">kaya</span><span style="font-size:1.38rem;opacity:0.78" title="1">kayow</span><span style="font-size:1.38rem;opacity:0.78" title="1">kinda</span><span style="font-size:1.38rem;opacity:0.78" title="1">kulang</span><span style="font-size:1.38rem;opacity:0.78" title="1">lakad</span><span style="font-size:1.38rem;opacity:0.78" title="1">lalo</span><span style="font-size:1.38rem;opacity:0.78" title="1">lamang</span><span style="font-size:1.38rem;opacity:0.78" title="1">let</span><span style="font-size:1.38rem;opacity:0.78" title="1">like</span><span style="font-size:1.38rem;opacity:0.78" title="1">little</span><span style="font-size:1.38rem;opacity:0.78" title="1">lomi</span><span style="font-size:1.38rem;opacity:0.78" title="1">lonely</span><span style="font-size:1.38rem;opacity:0.78" title="1">long</span><span style="font-size:1.38rem;opacity:0.78" title="1">lord</span><span style="font-size:1.38rem;opacity:0.78" title="1">lumilitaw</span><span style="font-size:1.38rem;opacity:0.78" title="1">lunch</span><span style="font-size:1.38rem;opacity:0.78" title="1">madlang</span><span style="font-size:1.38rem;opacity:0.78" title="1">maganda</span><span style="font-size:1.38rem;opacity:0.78" title="1">maghsr</span><span style="font-size:1.38rem;opacity:0.78" title="1">maglalakad</span></div>
+  </section>
+  <section class="card">
+    <h2>Emojis</h2>
+    <div class="emojis">
+      <div><b>:grin:</b><span>5</span></div><div><b>:peek:</b><span>2</span></div>
+    </div>
+  </section>
+</div>
+
+
+<footer>
+  Generated 1 Nov 2026, 04:58 PST · times in the server's local timezone · message text is discarded after counting, only aggregate numbers are stored.<br>
+  Self-hosted with <a href="https://github.com/rpfilomeno/discord-stats">discord-stats</a> · build e3fff3d.
+</footer>
+</main>
+
+<script>
+(function(){
+  var t=document.getElementById('mt'),q=document.getElementById('q');
+  if(!t||!q)return;
+  var body=t.tBodies[0],rows=[].slice.call(body.rows),dir=-1,key=2;
+  function val(r,k){var c=r.cells[k].textContent.trim();var n=parseFloat(c.replace(/[^0-9.\-]/g,''));
+    return isNaN(n)?c.toLowerCase():n;}
+  function sort(k){dir=key===k?-dir:-1;key=k;
+    rows.sort(function(a,b){var x=val(a,k),y=val(b,k);
+      return (x>y?1:x<y?-1:0)*dir;});
+    rows.forEach(function(r){body.appendChild(r);});}
+  [].forEach.call(t.tHead.rows[0].cells,function(th){
+    th.addEventListener('click',function(){sort(+th.dataset.k);});});
+  q.addEventListener('input',function(){
+    var v=q.value.toLowerCase();
+    rows.forEach(function(r){r.style.display=r.textContent.toLowerCase().indexOf(v)>-1?'':'none';});});
+})();
+</script>
+</body>
+</html>
+
+
